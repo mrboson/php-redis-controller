@@ -1,6 +1,8 @@
 # php-redis-controller
 
-This cache controller is an observer that interfaces with a Redis server.  It will check to see if a request is eligible for caching, and if so, determine if a cached copy is available.
+This cache controller is an observer that interfaces with a Redis server.  It will check to see if a request is eligible for caching, and if so, determine if a cached copy is available.  When available, the cached copy is returned to the browser, including all http headers.  When not available, your PHP code will function as normal to generate content.  The controller will cache that content to be available on the next request.
+
+The basic purpose of this php-redis-controller is to provide a lightweight (and easy to implement) front end cache to any PHP page you wish to make cacheable.  I use this in front of my Wordpress installs, and I generally get millisecond rendering times for pages that get cached.
 
 ### Requirements
 
