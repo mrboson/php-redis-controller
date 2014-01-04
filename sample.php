@@ -8,6 +8,7 @@
 
 	// Include this loader at the beginning of your page's execution, and your page will be managed by the
 	// cache controller.
+	require_once("rcc-config.php");
 	require_once("redis_cache_controller/loader.php");
 	
 	// If the rest of this page's code is executing, then the controller did not return a cached copy.

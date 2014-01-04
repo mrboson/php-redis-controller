@@ -10,6 +10,7 @@
 	// https://github.com/nicolasff/phpredis
 	// Follow the instructions to acquire and download the extension before attempting to use the cache controller.
 
+	define('REDIS_Cache_controller_loaded', true);
 	define('REDIS_Cache_stage_OFF', 0);
 	define('REDIS_Cache_stage_GENERATE', 1);
 	define('REDIS_Cache_stage_STORE', 2);
@@ -61,6 +62,9 @@
 		// Time to live
 		protected $_ttl = REDIS_Cache_Default_TTL;
 
+		// Setting to return in header Cache-control
+		protected $_cache_control_max_age = 0;
+
 		// timing stats
 		protected $_start_time = 0;
 		protected $_end_time = 0;
@@ -81,6 +85,7 @@
 			$this->database = (isset($args['database']) && intval($args['database'])) ? intval($args['database']) : 1;
 			$this->autopilot = (isset($args['autopilot'])) ? $args['autopilot'] : $this->autopilot;
 			$this->_ttl = (isset($args['ttl']) && intval($args['ttl'])) ? intval($args['ttl']) : REDIS_Cache_Default_TTL;
+			$this->_cache_control_max_age = (isset($args['cache_control_max_age']) && intval($args['cache_control_max_age'])) ? intval($args['cache_control_max_age']) : 0;
                         if (isset($args['no_cache_for'])) {
                             $this->no_cache_req_parts['segments'] = isset($args['no_cache_for']['segments'])
                                                                   ? $args['no_cache_for']['segments']
@@ -159,7 +164,7 @@
 						break;
 
 					case 'flushall':
-						$this->flush_set($this->_set);
+						$this->flush_set_key($this->_set);
 						$reload = true;
 						break;
 
@@ -194,41 +199,50 @@
 		function can_we_cache() {
 			$use_caching = true;
 
-			// Look for query strings registered by calling program that would disable caching:
-			if ($use_caching && $this->query_s && !empty($this->no_cache_req_parts['arguments'])) {
-                            foreach($this->no_cache_req_parts['arguments'] as $argument) {
-                                $use_caching = !array_key_exists($argument,$_GET);
-                                if (!$use_caching) {
-                                    break;
-                                }
-                            }
+			if ($this->autopilot) {
+				// Look for query strings registered by calling program that would disable caching:
+				if ($use_caching && $this->query_s && !empty($this->no_cache_req_parts['arguments'])) {
+				    foreach($this->no_cache_req_parts['arguments'] as $argument) {
+					$use_caching = !array_key_exists($argument,$_GET);
+					if (!$use_caching) {
+					    break;
+					}
+				    }
+				}
+				// Look for path segments registered by calling program that would disable caching:
+				if ($use_caching && !empty($this->no_cache_req_parts['segments'])) {
+				    $url_parts = parse_url($_SERVER['REQUEST_URI']);
+				    if (isset($url_parts['path'])) {
+					$segments_match = array_intersect($this->no_cache_req_parts['segments'], explode('/', $url_parts['path']));
+					$use_caching = empty($segments_match);
+				    }
+				    unset($url_parts);
+				}
+				// Look for cookie fragments registered by calling program that would disable caching:
+				if ($use_caching && !empty($this->no_cache_req_parts['cookies'])) {
+				    $cookie = var_export($_COOKIE, true);
+				    foreach($this->no_cache_req_parts['cookies'] as $crumb) {
+					$use_caching = !preg_match("/$crumb/", $cookie);
+					if (!$use_caching) {
+					    break;
+					}
+				    }
+				    unset($cookie);
+				}
 			}
-                        // Look for path segments registered by calling program that would disable caching:
-                        if ($use_caching && !empty($this->no_cache_req_parts['segments'])) {
-                            $url_parts = parse_url($_SERVER['REQUEST_URI']);
-                            if (isset($url_parts['path'])) {
-                                $segments_match = array_intersect($this->no_cache_req_parts['segments'], explode('/', $url_parts['path']));
-                                $use_caching = empty($segments_match);
-                            }
-                            unset($url_parts);
-                        }
-                        // Look for cookie fragments registered by calling program that would disable caching:
-                        if ($use_caching && !empty($this->no_cache_req_parts['cookies'])) {
-                            $cookie = var_export($_COOKIE, true);
-                            foreach($this->no_cache_req_parts['cookies'] as $crumb) {
-                                $use_caching = !preg_match("/$crumb/", $cookie);
-                                if (!$use_caching) {
-                                    break;
-                                }
-                            }
-                            unset($cookie);
-                        }
+
 			$this->caching_enabled = $use_caching;
 
 			return $use_caching;
 		}
 
 		function flush_set($set = '') {
+			if ($set) {
+				$this->flush_set_key(md5($set.':'.$this->http_host));
+			}
+		}
+
+		function flush_set_key($set = '') {
 			if (!$set) {
 				$set = $this->_set;
 			}
@@ -383,7 +397,7 @@
 				if (isset($package['headers'])) {
 					// Add last modified and cache-control headers:
 					$package['headers'][] = 'Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT';
-					$package['headers'][] = 'Cache-Control: max-age='.intval($this->_ttl/20) . ', must-revalidate';
+					$package['headers'][] = 'Cache-Control: max-age='.$this->_cache_control_max_age.', must-revalidate';
 
 					// Add our own cache info headers:
 					$package['headers'][] = 'X-Cache-key: '.$this->_key;
