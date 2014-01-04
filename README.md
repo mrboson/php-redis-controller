@@ -28,3 +28,7 @@ There are some behaviors you can control, such as disabling caching for for page
 arguments, path segments, and cookies.  See loader.php for an example.
 
 You (or your PHP code) can also embed special tokens into the content which will be evaluated by the cache controller.  See the example in sample.php.
+
+### WordPress Integration
+
+Take a look at the wordpress-sample.php file.  Basically, you want to use something like this instead of the normal index.php used by WordPress (i.e., you could change which file is the default index in your WordPress root).  You will also want to copy the file in the WordPress-plugin into your WP plugins folder, then in wp-admin activate the RCC Functions plugin.
