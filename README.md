@@ -10,7 +10,7 @@ Php-redis-controller depends on the PhpRedis extension provided by Nicolasff (av
 
 ### Implementation
 
-Include redis_cache_controller/loader.php on any PHP page you wish to be managed by the cache controller.  Change the constants and config variables at the top of loader.php to match your environment.
+Include rcc-config.php and ./redis_cache_controller/loader.php on any PHP page you wish to be managed by the cache controller.  Change the constants and config variables in rcc-config.php to match your environment (if you are caching WordPress, then use rcc-wordpress-config.php instead of rcc-config.php).
 
 Test using the provided sample.php.
 
