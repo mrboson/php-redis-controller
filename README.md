@@ -12,13 +12,33 @@ Php-redis-controller depends on the PhpRedis extension provided by Nicolasff (av
 
 Include rcc-config.php and ./redis_cache_controller/loader.php on any PHP page you wish to be managed by the cache controller.  Change the constants and config variables in rcc-config.php to match your environment (if you are caching WordPress, then use rcc-wordpress-config.php instead of rcc-config.php).
 
-Test using the provided sample.php.
+Test that cachin g is working by using the provided sample.php.
+
+You can also load php-redis-controller in a non-caching mode if you wish to interact with via its API:
+
+
+```php
+require_once("rcc-config.php");
+$RCC_AUTOPILOT = false;
+require_once("redis_cache_controller/loader.php");
+
+```
+
+This sets autopilot mode to false, so you would need to control caching.
 
 ### Cache Sets and Flushing
 
 Php-redis-controller allows you to define sets or collections of caches.  While each page in cache is tracked individually, each is also tracked according to which set it belongs to.  This makes it possible to delete all of the pages in a set at once.  For example, I use this in a Wordpress system to flush all cache entries associated with a blog post every time the post is edited or receives a comment.  Flushing can be triggered by two special directives that can be appended to a URL in order to flush items out of the cache.  Usage:
 http://mysite.com/mypage.php?_r=flush      --   this will flush mypage.php out of the cache
 http://mysite.com/mypage.php?_r=flushall   --   this will flush all pages belonging to mypage.php's cache set.
+
+You can also flush cache entries using API calls, just load load php-redis-controller with its autopilot off.  Then you can make calls such as this:
+
+```php
+$CWP_Cache->flush_set('cache set name');   // removes all cache entries belonging to cache set 'cache set name'
+$CWP_Cache->flush_item('cache set name', 'cache key');  // removes cache entry with key = 'cache key'
+
+```
 
 ### Integration with your site
 
