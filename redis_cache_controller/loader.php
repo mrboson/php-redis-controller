@@ -17,7 +17,8 @@
 								'arguments' => $no_cache_querystrings,	    // querystring arguments
 								'segments' => $no_cache_segments,           // parts of the path
 								'cookies' => $no_cache_cookies              // parts of cookies
-						        )
+						        ),
+						   'cache_replace' => $cache_replace,
 						   )
 					       );
 
@@ -25,7 +26,7 @@
 
 	// The key for a cache entry is derived from the REQUEST_URI.
 	$_uri = $_SERVER['REQUEST_URI'];
-	
+
 	// Each cache entry is stored in a set.  You can define many sets.  The benefit is that you will be able
 	// to flush all of the items in a set using a single directive.
 	$cache_set = 'default';

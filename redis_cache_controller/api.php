@@ -40,6 +40,8 @@
                                                         'cookies' => array(),
                                                       );
 
+		protected $cache_replace = array();
+
 		// Keys used by Redis
 		protected $_set = '';
 		protected $_key = '';
@@ -99,6 +101,11 @@
                         }
 			if (isset($args['app_name']) && $args['app_name']) {
 				$this->app_name = $args['app_name'];
+			}
+
+			if(isset($args['cache_replace']))
+			{
+				$this->cache_replace = $args['cache_replace'];
 			}
 
 			// Instantiate the object here, that way if we fail our object won't load
@@ -169,11 +176,11 @@
 						break;
 
 					case 'expire':
-						
+
 						break;
 
 					case 'persist':
-						
+
 						break;
 				}
 				if ($reload) {
@@ -390,10 +397,10 @@
 			$ret = false;
 			if ($this->connect()) {
 				$this->_cached_stage = REDIS_Cache_stage_GENERATE;
-	
+
 				$package['generated'] = date(DATE_RFC822);
 				$package['expires'] = date(DATE_RFC822, time() + $this->_ttl);
-	
+
 				if (isset($package['headers'])) {
 					// Add last modified and cache-control headers:
 					$package['headers'][] = 'Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT';
@@ -404,10 +411,17 @@
 					$package['headers'][] = 'X-Cache-set: '.$this->_set;
 					$package['headers'][] = 'X-Cache-Content-Created: '.$package['generated'];
 					$package['headers'][] = 'X-Cache-expires: '.$package['expires'];
-	
+
 					$package['headers'] = array_values($package['headers']);
 				}
-	
+
+				// replace stuff in html before saving:
+				if(!empty($this->cache_replace))
+				{
+					$patterns = array_keys($this->cache_replace);
+					$package['content'] = preg_replace($patterns, $this->cache_replace, $package['content']);
+				}
+
 				// store package to redis cache
 				if ($this->redis->sAdd($this->_set, $this->_key) && $this->redis->setex($this->_key, $this->_ttl, serialize($package)) !== false) {
 					$this->_cached_stage = REDIS_Cache_stage_STORE;
@@ -446,7 +460,7 @@
 			$content = $this->_content;
 
 			if ($this->_cached_stage == REDIS_Cache_stage_CACHED) {
-				
+
 			}
 			// Set the cache meta data:
 			$cache_meta_data = $this->_get_cache_metadata();
