@@ -20,10 +20,10 @@
         // the cache for that URL will be disabled
         $no_cache_cookies = array('wordpress_logged_in');
 
-		// Replace stuff in html before it gets saved to cache.
-		// should be a regular expresssion pattern as key and the corresponding replacement as value for use in preg_replace:
-		$cache_replace =array(
-			'#input id="author" name="author" type="text" value="(.+)" size="30"#' => 'input id="author" name="author" type="text" value="" size="30"',
-			'#input id="email" name="email" type="text" value="(.+)" size="30"#' => 'input id="email" name="email" type="text" value="" size="30"',
-			'#input id="url" name="url" type="text" value="(.+)" size="30"#' => 'input id="url" name="url" type="text" value="" size="30"',
-		);
+        // Replace stuff in html before it gets saved to cache.
+        // should be a regular expresssion pattern as key and the corresponding replacement as value for use in preg_replace:
+        $cache_replace =array(
+                '#input id="author" name="author" type="text" value="(.+)" size="30"#' => 'input id="author" name="author" type="text" value="" size="30"',
+                '#input id="email" name="email" type="text" value="(.+)" size="30"#' => 'input id="email" name="email" type="text" value="" size="30"',
+                '#input id="url" name="url" type="text" value="(.+)" size="30"#' => 'input id="url" name="url" type="text" value="" size="30"',
+        );

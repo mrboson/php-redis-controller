@@ -19,3 +19,7 @@
         // For cookies, any time the request contains cookies matching any of these values
         // the cache for that URL will be disabled
         $no_cache_cookies = array('wordpress_logged_in');
+
+        // Replace stuff in html before it gets saved to cache.
+        // should be a regular expresssion pattern as key and the corresponding replacement as value for use in preg_replace:
+        $cache_replace = array();
