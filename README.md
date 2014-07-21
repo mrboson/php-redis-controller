@@ -45,7 +45,9 @@ $CWP_Cache->flush_item('cache set name', 'cache key');  // removes cache entry w
 Assuming your Redis server is running and avaliable via the PhpRedis extension on your server, the php-redis-controller will begin caching and serving from cache automatically.
 
 There are some behaviors you can control, such as disabling caching for for pages based on querystring
-arguments, path segments, and cookies.  See loader.php for an example.
+arguments, path segments, and cookies.  You can also define HTML strings that will be replaced before caching, useful for doings things like removing values from form variables, or making sure a login form is not caching user names.
+
+See rcc-config.php (or rcc-wordpress-config.php) if you are using with WordPress.
 
 You (or your PHP code) can also embed special tokens into the content which will be evaluated by the cache controller.  See the example in sample.php.
 
